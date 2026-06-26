@@ -1,0 +1,36 @@
+# ── Secrets — NEVER commit ─────────────────────────────────────────────
+.env
+.env.local
+*.key
+*.pem
+
+# ── Database / data (private lead data) ────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+database/*.db
+
+# ── Python ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# ── Node (if any tooling is added) ─────────────────────────────────────
+node_modules/
+
+# ── OS / editor ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# ── Logs / temp ────────────────────────────────────────────────────────
+*.log
+debug_*.html
+ddg_result.html
+_*.png

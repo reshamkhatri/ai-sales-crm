@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overview · AI Sales CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #e7e8ea;
+            --panel: #ffffff;
+            --panel-2: #f4f5f7;
+            --ink: #15161a;
+            --ink-2: #3a3c44;
+            --muted: #8b8e98;
+            --muted-2: #aeb1ba;
+            --line: #ececef;
+            --rail: #16171b;
+            --rail-2: #20222a;
+            --lime: #c8f135;
+            --lime-dark: #b4dc28;
+            --lime-ink: #1b2207;
+            --coral: #ff6f61;
+            --coral-bg: #ffe2de;
+            --purple: #8b7bff;
+            --purple-bg: #ece9fd;
+            --purple-soft: #d9d3fb;
+            --blue: #5ab0ff; --blue-bg: #d8eeff;
+            --green: #16955a; --green-bg: #d6f6e0;
+            --radius: 22px;
+            --radius-md: 16px;
+            --radius-sm: 11px;
+        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            margin: 0; background: var(--bg); color: var(--ink);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            font-size: 14px; -webkit-font-smoothing: antialiased;
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: #d6d8dc; border-radius: 99px; }
+
+        .app { display: grid; grid-template-columns: 72px 1fr; gap: 14px; height: 100vh; padding: 14px; }
+
+        /* ---------- Icon rail (shared with workspace) ---------- */
+        .rail { background: var(--rail); border-radius: var(--radius); padding: 18px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .rail .logo { width: 42px; height: 42px; border-radius: 13px; background: var(--lime); display: grid; place-items: center; margin-bottom: 18px; }
+        .rail .logo svg { width: 24px; height: 24px; stroke: var(--lime-ink); }
+        .rail a { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; color: #9a9da6; text-decoration: none; transition: background .15s, color .15s; }
+        .rail a svg { width: 20px; height: 20px; stroke: currentColor; }
+        .rail a:hover { background: var(--rail-2); color: #fff; }
+        .rail a.active { background: var(--lime); color: var(--lime-ink); }
+        .rail .spacer { flex: 1; }
+        .rail .me { width: 40px; height: 40px; border-radius: 50%; background: var(--lime); display:grid; place-items:center; font-weight:700; color: var(--lime-ink); }
+
+        .main { overflow-y: auto; padding: 6px 14px 30px 6px; }
+
+        /* ---------- Topbar ---------- */
+        .topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin: 8px 4px 22px; }
+        h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+        .subtitle { color: var(--muted); margin-top: 7px; font-size: 14px; }
+        .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+        .btn { border: 0; border-radius: 13px; background: var(--ink); color: #fff; padding: 11px 17px; font: inherit; font-weight: 650; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; justify-content: center; min-height: 42px; transition: transform .12s, filter .15s; white-space: nowrap; }
+        .btn svg { width: 16px; height: 16px; stroke: currentColor; }
+        .btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+        .btn.lime { background: var(--lime); color: var(--lime-ink); }
+        .btn.secondary { background: var(--panel); color: var(--ink); }
+        .btn.secondary:hover { background: var(--panel-2); }
+        .btn.ghost { background: transparent; color: var(--muted); min-height: 34px; padding: 7px 12px; }
+        .btn.ghost:hover { background: var(--panel-2); color: var(--ink); }
+        .btn.sm { min-height: 38px; padding: 9px 14px; font-size: 13px; border-radius: 11px; }
+
+        /* ---------- Stat tiles ---------- */
+        .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 14px; }
+        .tile { background: var(--panel); border-radius: var(--radius-md); padding: 18px 18px; }
+        .tile .t-top { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12.5px; font-weight: 650; }
+        .tile .ring { width: 13px; height: 13px; border-radius: 50%; border: 2px solid currentColor; flex-shrink: 0; }
+        .tile.green .ring { color: var(--lime-dark); }
+        .tile.red .ring { color: var(--coral); }
+        .tile.purple .ring { color: var(--purple); }
+        .tile.blue .ring { color: var(--blue); }
+        .tile .num { font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin-top: 10px; }
+        .tile .sub { font-size: 12px; color: var(--muted-2); margin-top: 6px; }
+
+        /* ---------- Layout ---------- */
+        .grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; align-items: start; }
+        .col { display: flex; flex-direction: column; gap: 14px; }
+        .card { background: var(--panel); border-radius: var(--radius); padding: 20px; min-width: 0; }
+        .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+        .card-title { display: flex; align-items: center; gap: 12px; }
+        .card-title .ico { width: 36px; height: 36px; border-radius: 11px; flex-shrink: 0; display: grid; place-items: center; background: var(--lime); color: var(--lime-ink); }
+        .card-title .ico.purple { background: var(--purple-bg); color: var(--purple); }
+        .card-title .ico.coral { background: var(--coral-bg); color: var(--coral); }
+        .card-title .ico svg { width: 18px; height: 18px; stroke: currentColor; }
+        h2 { margin: 0; font-size: 17px; font-weight: 750; letter-spacing: -.01em; }
+        .card-title .muted { font-size: 12.5px; margin-top: 2px; }
+        .muted { color: var(--muted); }
+
+        .brief { white-space: pre-wrap; line-height: 1.65; background: var(--panel-2); border-radius: var(--radius-md); padding: 16px; font-size: 13.5px; color: var(--ink-2); }
+
+        /* ---------- Ad metrics ---------- */
+        .ad-hero { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+        .ad-metric { background: var(--panel-2); border-radius: var(--radius-md); padding: 14px; }
+        .ad-metric .lbl { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+        .ad-metric strong { display: block; font-size: 22px; margin-top: 7px; font-weight: 800; letter-spacing: -.02em; }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+        th { color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+        th:first-child, td:first-child { padding-left: 2px; }
+        tbody tr:last-child td { border-bottom: 0; }
+        td .reason { color: var(--muted); font-size: 12.5px; max-width: 240px; }
+
+        .pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 5px 11px; font-size: 11.5px; font-weight: 700; white-space: nowrap; line-height: 1; }
+        .pill.hot, .pill.kill, .pill.cut { background: var(--coral); color: #fff; }
+        .pill.warm, .pill.watch, .pill.refresh { background: var(--lime); color: var(--lime-ink); }
+        .pill.scale, .pill.good { background: var(--green-bg); color: var(--green); }
+        .pill.info { background: var(--blue-bg); color: #1f7fa8; }
+
+        .score { display: inline-flex; align-items: center; justify-content: center; min-width: 42px; padding: 5px 11px; border-radius: 999px; font-weight: 700; font-size: 12px; }
+        .score.s-hot { background: var(--coral); color: #fff; }
+        .score.s-warm { background: var(--lime); color: var(--lime-ink); }
+        .score.s-cold { background: var(--purple-soft); color: #5a4fcf; }
+
+        /* ---------- Lead list ---------- */
+        .lead-list { display: grid; gap: 10px; }
+        .lead { display: flex; align-items: center; gap: 13px; border-radius: var(--radius-md); padding: 13px 14px; background: var(--panel-2); transition: transform .12s; }
+        .lead:hover { transform: translateX(2px); }
+        .avatar { width: 42px; height: 42px; border-radius: 13px; flex-shrink: 0; display: grid; place-items: center; font-weight: 700; font-size: 15px; color: #fff; }
+        .lead-body { min-width: 0; flex: 1; }
+        .lead-name { font-weight: 700; font-size: 14px; }
+        .lead-meta { color: var(--muted); font-size: 12px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .empty { background: var(--panel-2); border-radius: var(--radius-md); padding: 26px 20px; color: var(--muted); text-align: center; font-size: 13px; line-height: 1.6; }
+        .empty .em-ico { width: 46px; height: 46px; margin: 0 auto 13px; display: grid; place-items: center; border-radius: 13px; background: var(--lime); color: var(--lime-ink); }
+        .empty .em-ico svg { width: 22px; height: 22px; stroke: currentColor; }
+        .empty code { background: var(--panel); padding: 2px 6px; border-radius: 5px; font-size: 12px; color: var(--ink); }
+
+        .textarea, .input { width: 100%; border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px 14px; font: inherit; background: var(--panel-2); color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+        .textarea::placeholder, .input::placeholder { color: var(--muted-2); }
+        .textarea:focus, .input:focus { outline: none; border-color: var(--lime-dark); box-shadow: 0 0 0 3px rgba(200,241,53,.4); }
+        .textarea { min-height: 70px; resize: vertical; }
+
+        /* ---------- Copilot chat ---------- */
+        .chat { display: flex; flex-direction: column; height: 320px; border-radius: var(--radius-md); background: var(--panel-2); overflow: hidden; margin-bottom: 12px; }
+        .chat-log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 86%; padding: 11px 14px; border-radius: 15px; font-size: 13px; line-height: 1.55; white-space: pre-wrap; word-wrap: break-word; }
+        .msg.user { align-self: flex-end; background: var(--lime); color: var(--lime-ink); border-bottom-right-radius: 5px; }
+        .msg.ai { align-self: flex-start; background: var(--panel); color: var(--ink-2); border-bottom-left-radius: 5px; }
+        .msg.ai.placeholder { color: var(--muted); font-style: italic; background: transparent; }
+        .typing { display: inline-flex; gap: 4px; align-items: center; }
+        .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
+        .typing i:nth-child(2){ animation-delay:.2s } .typing i:nth-child(3){ animation-delay:.4s }
+        @keyframes blink { 0%,60%,100%{ opacity:.25; transform:translateY(0) } 30%{ opacity:1; transform:translateY(-3px) } }
+        .chat-input { display: flex; gap: 10px; padding: 12px; border-top: 1px solid var(--line); background: var(--panel); }
+        .chat-input .textarea { min-height: 44px; max-height: 120px; background: var(--panel-2); }
+        .chat-input .send { width: 44px; min-width: 44px; }
+
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip { border: 0; background: var(--panel-2); border-radius: 999px; padding: 8px 14px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; transition: all .14s; }
+        .chip:hover { background: var(--lime); color: var(--lime-ink); }
+
+        .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .row { display: flex; gap: 10px; align-items: center; }
+
+        /* ---------- Follow-up tasks ---------- */
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+        .badge.overdue { background: var(--coral); color: #fff; }
+        .badge.today { background: var(--lime); color: var(--lime-ink); }
+        .task-list { display: grid; gap: 10px; margin-bottom: 14px; }
+        .task { display: flex; align-items: flex-start; gap: 12px; border-radius: var(--radius-md); padding: 13px 14px; background: var(--panel-2); border-left: 3px solid var(--lime-dark); transition: opacity .2s; }
+        .task.is-overdue { border-left-color: var(--coral); }
+        .task.done { opacity: .45; }
+        .task.done .task-title { text-decoration: line-through; }
+        .task-check { width: 22px; height: 22px; border-radius: 7px; border: 1.5px solid var(--muted-2); background: transparent; cursor: pointer; flex-shrink: 0; margin-top: 1px; display: grid; place-items: center; transition: all .15s; padding: 0; }
+        .task-check:hover { border-color: var(--lime-dark); background: var(--lime); }
+        .task-check svg { width: 13px; height: 13px; stroke: var(--lime-ink); opacity: 0; }
+        .task-check:hover svg, .task.done .task-check svg { opacity: 1; }
+        .task.done .task-check { background: var(--lime); border-color: var(--lime-dark); }
+        .task-body { flex: 1; min-width: 0; }
+        .task-title { font-weight: 650; font-size: 13.5px; }
+        .task-meta { color: var(--muted); font-size: 12px; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .task-meta .due.over { color: var(--coral); font-weight: 600; }
+        .task-snooze { background: transparent; border: 0; color: var(--muted); font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+        .task-snooze:hover { color: var(--ink); background: var(--panel); }
+        .add-task { display: flex; gap: 8px; }
+        .add-task .input { flex: 1; }
+
+        /* ---------- Modal ---------- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15,22,26,.45); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--panel); border-radius: var(--radius); width: 540px; max-width: 100%; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 70px -20px rgba(0,0,0,.5); }
+        .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--line); }
+        .modal-head h3 { margin: 0; font-size: 17px; font-weight: 800; }
+        .modal-close { border: 0; background: var(--panel-2); width: 34px; height: 34px; border-radius: 10px; cursor: pointer; font-size: 18px; line-height: 1; color: var(--ink); }
+        .modal-close:hover { background: var(--coral); color: #fff; }
+        .modal-body { padding: 8px 22px 20px; overflow-y: auto; }
+        .mrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+        .mrow:last-child { border-bottom: 0; }
+        .mrow .ml2 { font-weight: 700; font-size: 14px; }
+        .mrow .ms { color: var(--muted); font-size: 12px; margin-top: 3px; }
+
+        /* ---------- Toast ---------- */
+        #toasts { position: fixed; bottom: 22px; right: 22px; display: flex; flex-direction: column; gap: 10px; z-index: 99; }
+        .toast { background: var(--ink); color: #fff; padding: 12px 16px; border-radius: 12px; box-shadow: 0 16px 36px -14px rgba(0,0,0,.5); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; animation: sl .25s ease, fo .3s ease 3.2s forwards; max-width: 350px; }
+        .toast svg { width: 17px; height: 17px; stroke: var(--lime); flex-shrink: 0; }
+        .toast.err svg { stroke: var(--coral); }
+        @keyframes sl { from { transform: translateY(12px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+        @keyframes fo { to { opacity: 0 } }
+
+        @media (max-width: 1100px) {
+            .grid { grid-template-columns: 1fr; }
+            .tiles { grid-template-columns: repeat(2, 1fr); }
+            .ad-hero { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .app {
+                grid-template-columns: 1fr !important;
+                height: auto !important;
+                padding: 8px !important;
+            }
+            .rail {
+                flex-direction: row !important;
+                height: 52px !important;
+                padding: 0 14px !important;
+                width: 100% !important;
+                border-radius: var(--radius-md) !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                gap: 10px !important;
+            }
+            .rail .logo { margin-bottom: 0 !important; width: 34px !important; height: 34px !important; }
+            .rail a { width: 34px !important; height: 34px !important; }
+            .rail .spacer { display: none !important; }
+            .rail .me { width: 32px !important; height: 32px !important; }
+            
+            .topbar { flex-direction: column; align-items: stretch; gap: 12px; }
+            .tiles, .ad-hero, .quick-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- shared icon rail -->
+        <nav class="rail">
+            <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+            <a href="/overview" class="active" title="Overview"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></a>
+            <a href="/workspace" title="Workspace"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></a>
+            <a href="/workspace?openCalls=true" title="Calls"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></a>
+            <a href="/workspace?filterPipeline=true" title="Pipeline"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></a>
+            <a href="/workspace?openTasks=true" title="Tasks"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></a>
+            <a href="/workspace?openAIChat=true" title="AI Business Chatbot" id="aiChatRailBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="12" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/></svg></a>
+            <a href="/workspace?openProspect=true" title="Lead Prospecting"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg></a>
+            <a href="/workspace?filterHot=true" title="Hot leads"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></a>
+            <div class="spacer"></div>
+            <a href="/workspace?openAlerts=true" title="Alerts"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></a>
+            <div class="me">AI</div>
+        </nav>
+
+        <main class="main">
+            <div class="topbar">
+                <div>
+                    <h1>Sales Command Center</h1>
+                    <div class="subtitle">Decide who to call, which ads to trust, and what needs attention today.</div>
+                </div>
+                <div class="actions">
+                    <button class="btn lime" type="button" onclick="openAddLeadModal()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Lead</button>
+                    <a class="btn secondary" href="/workspace"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg> Open Workspace</a>
+                    <button class="btn secondary" type="button" onclick="regenerateBrief(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh Brief</button>
+                    <button class="btn secondary" type="button" onclick="analyzeAds(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2l1.6 4.4L15.5 8l-4.4 1.6L9.5 14 7.9 9.6 3.5 8l4.4-1.6L9.5 2z"/></svg> Analyze Ads</button>
+                </div>
+            </div>
+
+            <section class="tiles">
+                <div class="tile red"><div class="t-top"><span class="ring"></span> Hot Leads</div><div class="num">{{ hot_leads|length }}</div><div class="sub">Scoring 70+ · ready to contact</div></div>
+                <div class="tile green"><div class="t-top"><span class="ring"></span> Recent Leads</div><div class="num">{{ leads|length }}</div><div class="sub">In the pipeline right now</div></div>
+                <div class="tile purple"><div class="t-top"><span class="ring"></span> Meetings Today</div><div class="num">{{ today_meetings|length }}</div><div class="sub">Scheduled for the day</div></div>
+                <div class="tile blue"><div class="t-top"><span class="ring"></span> Ad Spend 7d</div><div class="num">${{ "%.0f"|format(ad_decisions.total_spend or 0) }}</div><div class="sub">{% if ad_decisions.cost_per_result %}${{ "%.2f"|format(ad_decisions.cost_per_result) }} / result{% else %}Awaiting results{% endif %}</div></div>
+            </section>
+
+            <div class="grid">
+                <div class="col">
+                    <section class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+                                <div><h2>Facebook Ads Intelligence</h2><div class="muted">What is working, what is not, and what to do next.</div></div>
+                            </div>
+                            <button class="btn ghost sm" type="button" onclick="openList('/api/ads','Ad Performance')">Open data →</button>
+                        </div>
+                        {% if ad_decisions.has_data %}
+                        <div class="ad-hero">
+                            <div class="ad-metric"><div class="lbl">Spend</div><strong>${{ "%.2f"|format(ad_decisions.total_spend or 0) }}</strong></div>
+                            <div class="ad-metric"><div class="lbl">Clicks</div><strong>{{ ad_decisions.total_clicks }}</strong></div>
+                            <div class="ad-metric"><div class="lbl">Leads + Msgs</div><strong>{{ ad_decisions.total_leads + ad_decisions.total_messages }}</strong></div>
+                            <div class="ad-metric"><div class="lbl">Cost / Result</div><strong>{% if ad_decisions.cost_per_result %}${{ "%.2f"|format(ad_decisions.cost_per_result) }}{% else %}-{% endif %}</strong></div>
+                        </div>
+                        <div class="brief md">{{ ad_decisions.recommendation }}</div>
+                        <div class="table-wrap" style="margin-top:16px">
+                        <table>
+                            <thead><tr><th>Ad</th><th>Spend</th><th>Results</th><th>CTR</th><th>Action</th><th>Why</th></tr></thead>
+                            <tbody>
+                                {% for ad in ad_decisions.ads %}
+                                <tr>
+                                    <td><strong>{{ ad.name }}</strong></td>
+                                    <td>${{ "%.2f"|format(ad.total_spend or 0) }}</td>
+                                    <td>{{ ad.results }}</td>
+                                    <td>{{ "%.2f"|format(ad.avg_ctr or 0) }}%</td>
+                                    <td><span class="pill {{ ad.action|lower|replace(' ', '-') }}">{{ ad.action }}</span></td>
+                                    <td><div class="reason">{{ ad.reason }}</div></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        </div>
+                        {% else %}
+                        <div class="empty">
+                            <div class="em-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+                            No Facebook ad data is loaded yet. Add <code>META_ACCESS_TOKEN</code> and <code>META_AD_ACCOUNT_ID</code>, then run <strong>Analyze Ads</strong> or wait for the 9&nbsp;AM pull.
+                        </div>
+                        {% endif %}
+                    </section>
+
+                    <section class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="ico coral"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.71-4.27 1-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.27-2.24.78-3.21"/></svg></div>
+                                <div><h2>Hot Leads</h2><div class="muted">Highest intent — reach out first.</div></div>
+                            </div>
+                            <a class="btn ghost sm" href="/workspace" target="_self">Open →</a>
+                        </div>
+                        <div class="lead-list">
+                            {% for lead in hot_leads %}
+                            <a class="lead" href="/workspace/{{ lead.id }}" style="text-decoration:none;color:inherit">
+                                <div class="avatar" style="background:hsl({{ (lead.id*47)%360 }},58%,52%)">{{ (lead.business_name or lead.name or "?")[:1]|upper }}</div>
+                                <div class="lead-body">
+                                    <div class="lead-name">{{ lead.business_name or lead.name or "Unknown Lead" }}</div>
+                                    <div class="lead-meta">{{ lead.source or "—" }} · {{ lead.status or "—" }} · {{ lead.phone or lead.email or "no contact saved" }}</div>
+                                </div>
+                                <span class="score s-hot">{{ lead.score }}</span>
+                            </a>
+                            {% else %}
+                            <div class="empty">
+                                <div class="em-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.71-4.27 1-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.27-2.24.78-3.21"/></svg></div>
+                                No hot leads yet. Once a lead scores 70+, it appears here.
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+                                <div><h2>Recent Leads</h2><div class="muted">Latest 20 in the pipeline.</div></div>
+                            </div>
+                            <a class="btn ghost sm" href="/workspace" target="_self">Open →</a>
+                        </div>
+                        <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Name</th><th>Source</th><th>Status</th><th>Score</th></tr></thead>
+                            <tbody>
+                                {% for lead in leads %}
+                                <tr onclick="location.href='/workspace/{{ lead.id }}'" style="cursor:pointer">
+                                    <td><strong>{{ lead.business_name or lead.name or "Unknown" }}</strong></td>
+                                    <td>{{ lead.source or "-" }}</td>
+                                    <td>{{ lead.status or "-" }}</td>
+                                    <td><span class="score {% if lead.score >= 70 %}s-hot{% elif lead.score >= 40 %}s-warm{% else %}s-cold{% endif %}">{{ lead.score }}</span></td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4" class="muted">No leads yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="col">
+                    <section class="card" id="followupsCard">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+                                <div>
+                                    <h2>Follow-ups</h2>
+                                    <div class="muted">
+                                        {% if task_summary.overdue %}<span class="badge overdue">{{ task_summary.overdue }} overdue</span> {% endif %}
+                                        {% if task_summary.today %}<span class="badge today">{{ task_summary.today }} due today</span>{% endif %}
+                                        {% if not task_summary.overdue and not task_summary.today %}Nothing due — you're on top of it.{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn ghost sm" type="button" onclick="generateFollowups(this)" title="Queue a follow-up for every hot lead">Auto-queue</button>
+                        </div>
+                        <div class="task-list" id="taskList">
+                            {% for t in followups %}
+                            <div class="task {% if t.overdue %}is-overdue{% endif %}" data-id="{{ t.id }}">
+                                <button class="task-check" type="button" onclick="completeTask({{ t.id }}, this)" title="Mark done">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                                </button>
+                                <div class="task-body">
+                                    <div class="task-title">{{ t.title }}</div>
+                                    <div class="task-meta">
+                                        {% if t.lead_business or t.lead_name %}<span>{{ t.lead_business or t.lead_name }}</span>{% endif %}
+                                        <span class="due {% if t.overdue %}over{% endif %}">{% if t.overdue %}Overdue · {% endif %}{{ t.due_date }}</span>
+                                        <button class="task-snooze" type="button" onclick="snoozeTask({{ t.id }}, this)">Snooze +1d</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="empty" id="taskEmpty">
+                                <div class="em-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+                                No follow-ups due. Add one below, or hit Auto-queue to chase your hot leads.
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="add-task">
+                            <input id="taskTitle" class="input" placeholder="Add a follow-up…" onkeydown="if(event.key==='Enter'){addTask();}">
+                            <button class="btn lime sm" type="button" onclick="addTask()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add</button>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="ico purple"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg></div>
+                                <div><h2>CEO Daily Brief</h2><div class="muted">Today, at a glance.</div></div>
+                            </div>
+                            <button class="btn ghost sm" type="button" onclick="regenerateBrief(this)">Refresh</button>
+                        </div>
+                        <div class="brief md">{{ daily_brief.content if daily_brief.content else "No brief generated yet. Hit Refresh Brief to create one." }}</div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                                <div><h2>Business Copilot</h2><div class="muted">Ask about leads, ads &amp; follow-ups.</div></div>
+                            </div>
+                        </div>
+                        <div class="chat">
+                            <div class="chat-log" id="chatLog">
+                                <div class="msg ai placeholder">Ask me anything about your leads, ads, follow-ups, or meetings.</div>
+                            </div>
+                            <div class="chat-input">
+                                <textarea id="copilotInput" class="textarea" placeholder="What should I focus on today?" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();askCopilot();}"></textarea>
+                                <button class="btn lime send" type="button" onclick="askCopilot()" id="sendBtn" title="Send">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chips">
+                            <button class="chip" onclick="ask('Which ads are working and what should I do?')">📊 Ad performance</button>
+                            <button class="chip" onclick="ask('Which leads need attention today?')">🔥 Hot leads</button>
+                            <button class="chip" onclick="ask('What should I focus on today?')">🎯 Today's focus</button>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>
+                                <div><h2>Teach The Copilot</h2><div class="muted">Add rules it must always follow.</div></div>
+                            </div>
+                        </div>
+                        <input id="businessRule" class="input" placeholder="e.g. Never offer discounts without CEO approval.">
+                        <div class="row" style="margin-top:12px">
+                            <button class="btn sm" type="button" onclick="saveRule()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg> Save Rule</button>
+                            <button class="btn secondary sm" type="button" onclick="openList('/api/copilot/business-rules','Business Rules')">View Rules</button>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+                                <div><h2>Quick Actions</h2></div>
+                            </div>
+                        </div>
+                        <div class="quick-grid">
+                            <a class="btn secondary sm" href="/workspace" target="_self">🎯 Find Leads</a>
+                            <a class="btn secondary sm" href="/lead-form" target="_blank">📝 Lead Form</a>
+                            <button class="btn secondary sm" type="button" onclick="openList('/api/call-list','Call List')">📞 Call List</button>
+                            <button class="btn secondary sm" type="button" onclick="openList('/api/leads/by-channel','Leads by Channel')">📡 Channels</button>
+                            <button class="btn secondary sm" type="button" onclick="openList('/api/leads/unread','Unread Messages')">✉️ Unread</button>
+                            <button class="btn secondary sm" type="button" onclick="checkEmail(this)">🔄 Check Email</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+        <div class="modal">
+            <div class="modal-head"><h3 id="modalTitle">List</h3><button class="modal-close" type="button" onclick="closeModal()">&times;</button></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="toasts"></div>
+
+    <script>
+        const ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+        const ICON_ERR = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+        function toast(message, isError) {
+            const el = document.createElement('div');
+            el.className = 'toast' + (isError ? ' err' : '');
+            el.innerHTML = (isError ? ICON_ERR : ICON_OK) + '<span>' + message + '</span>';
+            document.getElementById('toasts').appendChild(el);
+            setTimeout(() => el.remove(), 3800);
+        }
+
+        function busy(btn, on, label) {
+            if (!btn) return;
+            if (on) { btn.dataset.html = btn.innerHTML; btn.disabled = true; btn.style.opacity = .7; if (label) btn.innerHTML = label; }
+            else { btn.disabled = false; btn.style.opacity = 1; if (btn.dataset.html) btn.innerHTML = btn.dataset.html; }
+        }
+
+        // Lightweight, safe markdown → HTML for copilot answers.
+        function mdToHtml(raw) {
+            const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            const inline = t => esc(t)
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>');
+            const lines = String(raw == null ? '' : raw).split('\n');
+            let html = '', inList = false;
+            for (const line of lines) {
+                const h = line.match(/^#{1,6}\s*(.+)/);
+                const li = line.match(/^\s*[-•*]\s+(.+)/);
+                if (li) {
+                    if (!inList) { html += '<ul style="margin:6px 0 6px 2px;padding-left:18px">'; inList = true; }
+                    html += '<li style="margin:3px 0">' + inline(li[1]) + '</li>';
+                    continue;
+                }
+                if (inList) { html += '</ul>'; inList = false; }
+                if (h) html += '<div style="font-weight:700;margin:9px 0 3px">' + inline(h[1]) + '</div>';
+                else if (line.trim() === '') html += '<div style="height:6px"></div>';
+                else html += '<div>' + inline(line) + '</div>';
+            }
+            if (inList) html += '</ul>';
+            return html;
+        }
+
+        const log = document.getElementById('chatLog');
+        function addMsg(text, who) {
+            const placeholder = log.querySelector('.placeholder');
+            if (placeholder) placeholder.remove();
+            const el = document.createElement('div');
+            el.className = 'msg ' + who;
+            if (who === 'ai') el.innerHTML = mdToHtml(text);
+            else el.textContent = text;
+            log.appendChild(el);
+            log.scrollTop = log.scrollHeight;
+            return el;
+        }
+
+        function ask(text) {
+            document.getElementById('copilotInput').value = text;
+            askCopilot();
+        }
+
+        async function askCopilot() {
+            const input = document.getElementById('copilotInput');
+            const question = input.value.trim();
+            if (!question) { input.focus(); return; }
+            addMsg(question, 'user');
+            input.value = '';
+            const thinking = addMsg('', 'ai');
+            thinking.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+            busy(document.getElementById('sendBtn'), true);
+            try {
+                const res = await fetch('/api/copilot/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+                const data = await res.json();
+                thinking.innerHTML = mdToHtml(data.answer || data.error || 'No answer returned.');
+            } catch (e) {
+                thinking.textContent = 'Something went wrong. Please try again.';
+            } finally {
+                busy(document.getElementById('sendBtn'), false);
+                log.scrollTop = log.scrollHeight;
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch('/api/copilot/history');
+                const rows = await res.json();
+                if (Array.isArray(rows) && rows.length) {
+                    rows.reverse().forEach(m => addMsg(m.content, m.role === 'user' ? 'user' : 'ai'));
+                }
+            } catch (e) { /* keep placeholder */ }
+        }
+
+        async function saveRule() {
+            const input = document.getElementById('businessRule');
+            const ruleText = input.value.trim();
+            if (!ruleText) { input.focus(); return; }
+            try {
+                await fetch('/api/copilot/business-rules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rule_text: ruleText, category: 'ceo_preference' })
+                });
+                input.value = '';
+                toast('Rule saved — the copilot will follow it.');
+            } catch (e) { toast('Could not save rule.', true); }
+        }
+
+        async function regenerateBrief(btn) {
+            busy(btn, true, 'Refreshing…');
+            try {
+                await fetch('/api/copilot/daily-brief/generate', { method: 'POST' });
+                toast('Daily brief refreshed.');
+                setTimeout(() => location.reload(), 700);
+            } catch (e) { busy(btn, false); toast('Could not refresh brief.', true); }
+        }
+
+        async function analyzeAds(btn) {
+            busy(btn, true, 'Analyzing…');
+            try {
+                const res = await fetch('/api/ads/analyze', { method: 'POST' });
+                const data = await res.json();
+                busy(btn, false);
+                toast(data.error ? data.error : 'Ad analysis complete.', !!data.error);
+            } catch (e) { busy(btn, false); toast('Could not analyze ads.', true); }
+        }
+
+        async function checkEmail(btn) {
+            busy(btn, true, '🔄 Checking…');
+            try {
+                const res = await fetch('/api/email/check', { method: 'POST' });
+                const data = await res.json();
+                busy(btn, false);
+                toast('Checked email — ' + (data.checked || 0) + ' new message(s).');
+            } catch (e) { busy(btn, false); toast('Could not check email.', true); }
+        }
+
+        // ---------- Follow-up tasks ----------
+        async function completeTask(id, btn) {
+            const task = btn.closest('.task');
+            task.classList.add('done');
+            try {
+                await fetch('/api/tasks/' + id + '/complete', { method: 'POST' });
+                toast('Follow-up completed.');
+                setTimeout(() => { task.style.height = '0'; task.style.padding = '0'; task.style.margin = '0'; task.style.overflow = 'hidden'; setTimeout(() => task.remove(), 200); }, 500);
+            } catch (e) { task.classList.remove('done'); toast('Could not complete task.', true); }
+        }
+
+        async function snoozeTask(id, btn) {
+            const task = btn.closest('.task');
+            try {
+                const res = await fetch('/api/tasks/' + id + '/snooze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'days=1'
+                });
+                const data = await res.json();
+                task.style.opacity = .3;
+                setTimeout(() => task.remove(), 250);
+                toast('Snoozed to ' + (data.due_date || 'tomorrow') + '.');
+            } catch (e) { toast('Could not snooze task.', true); }
+        }
+
+        async function addTask() {
+            const input = document.getElementById('taskTitle');
+            const title = input.value.trim();
+            if (!title) { input.focus(); return; }
+            try {
+                const res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title })
+                });
+                const t = await res.json();
+                if (t.error) { toast(t.error, true); return; }
+                input.value = '';
+                const empty = document.getElementById('taskEmpty');
+                if (empty) empty.remove();
+                const el = document.createElement('div');
+                el.className = 'task';
+                el.dataset.id = t.id;
+                el.innerHTML =
+                    '<button class="task-check" type="button" title="Mark done">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>' +
+                    '<div class="task-body"><div class="task-title"></div>' +
+                    '<div class="task-meta"><span class="due">' + (t.due_date || 'today') + '</span>' +
+                    '<button class="task-snooze" type="button">Snooze +1d</button></div></div>';
+                el.querySelector('.task-title').textContent = t.title;
+                el.querySelector('.task-check').onclick = () => completeTask(t.id, el.querySelector('.task-check'));
+                el.querySelector('.task-snooze').onclick = () => snoozeTask(t.id, el.querySelector('.task-snooze'));
+                document.getElementById('taskList').appendChild(el);
+                toast('Follow-up added.');
+            } catch (e) { toast('Could not add task.', true); }
+        }
+
+        async function generateFollowups(btn) {
+            busy(btn, true, 'Queuing…');
+            try {
+                const res = await fetch('/api/tasks/generate-followups', { method: 'POST' });
+                const data = await res.json();
+                busy(btn, false);
+                if (data.created > 0) {
+                    toast('Queued ' + data.created + ' follow-up(s) for hot leads.');
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    toast('No new follow-ups needed — hot leads are covered.');
+                }
+            } catch (e) { busy(btn, false); toast('Could not queue follow-ups.', true); }
+        }
+
+        // ---------- List modal (replaces raw JSON pages) ----------
+        function closeModal() { document.getElementById('modal').classList.remove('open'); }
+        function esc(s) { const d = document.createElement('div'); d.textContent = (s == null ? '' : String(s)); return d.innerHTML; }
+
+        function renderData(data) {
+            if (Array.isArray(data)) {
+                if (!data.length) return '<div class="muted" style="padding:16px 0">Nothing here yet.</div>';
+                return data.map(it => {
+                    if (it && typeof it === 'object') {
+                        const name = it.business_name || it.name || it.title || it.lead_name || it.lead_business || ('#' + (it.id || ''));
+                        const bits = [];
+                        if (it.status) bits.push(it.status);
+                        if (it.score != null) bits.push('score ' + it.score);
+                        if (it.phone) bits.push(it.phone);
+                        if (it.email) bits.push(it.email);
+                        if (it.msg_count != null) bits.push(it.msg_count + ' unread');
+                        if (it.due_date) bits.push('due ' + it.due_date);
+                        if (it.source) bits.push(it.source);
+                        return '<div class="mrow"><div><div class="ml2">' + esc(name) + '</div><div class="ms">' + esc(bits.join(' · ')) + '</div></div></div>';
+                    }
+                    return '<div class="mrow"><div class="ml2">' + esc(it) + '</div></div>';
+                }).join('');
+            }
+            if (data && typeof data === 'object') {
+                const keys = Object.keys(data);
+                if (!keys.length) return '<div class="muted" style="padding:16px 0">Nothing here yet.</div>';
+                return keys.map(k => {
+                    const v = data[k];
+                    if (v && typeof v === 'object') return '';
+                    return '<div class="mrow"><div class="ml2" style="text-transform:capitalize">' + esc(k.replace(/_/g,' ')) + '</div><div class="ml2">' + esc(v) + '</div></div>';
+                }).join('') || '<div class="muted" style="padding:16px 0">Nothing to show.</div>';
+            }
+            return '<div class="mrow">' + esc(data) + '</div>';
+        }
+
+        async function openList(url, title) {
+            const m = document.getElementById('modal');
+            document.getElementById('modalTitle').textContent = title;
+            const body = document.getElementById('modalBody');
+            body.innerHTML = '<div class="muted" style="padding:16px 0">Loading…</div>';
+            m.classList.add('open');
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                body.innerHTML = renderData(data);
+            } catch (e) { body.innerHTML = '<div class="muted" style="padding:16px 0">Could not load.</div>'; }
+        }
+
+        function openAddLeadModal() {
+            const m = document.getElementById('modal');
+            document.getElementById('modalTitle').textContent = "Add New Lead";
+            const body = document.getElementById('modalBody');
+            body.innerHTML = `
+                <form id="addLeadForm" onsubmit="submitAddLead(event)" style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div>
+                            <label style="font-weight:600; font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Lead Name *</label>
+                            <input type="text" id="leadName" name="name" class="input" placeholder="e.g. Rami" required style="width:100%; border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 12px; font:inherit; background:var(--panel-2); color:var(--ink);">
+                        </div>
+                        <div>
+                            <label style="font-weight:600; font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Business Name</label>
+                            <input type="text" id="leadBusiness" name="business" class="input" placeholder="e.g. Marina Café" style="width:100%; border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 12px; font:inherit; background:var(--panel-2); color:var(--ink);">
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div>
+                            <label style="font-weight:600; font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Phone</label>
+                            <input type="text" id="leadPhone" name="phone" class="input" placeholder="e.g. +97155..." style="width:100%; border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 12px; font:inherit; background:var(--panel-2); color:var(--ink);">
+                        </div>
+                        <div>
+                            <label style="font-weight:600; font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Email</label>
+                            <input type="email" id="leadEmail" name="email" class="input" placeholder="e.g. info@business.com" style="width:100%; border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 12px; font:inherit; background:var(--panel-2); color:var(--ink);">
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div>
+                            <label style="font-weight:600; font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Location</label>
+                            <input type="text" id="leadLocation" name="location" class="input" placeholder="e.g. Dubai Marina" style="width:100%; border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 12px; font:inherit; background:var(--panel-2); color:var(--ink);">
+                        </div>
+                        <div>
+                            <label style="font-weight:600; font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Industry / Role</label>
+                            <input type="text" id="leadIndustry" name="industry" class="input" placeholder="e.g. Restaurant" style="width:100%; border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 12px; font:inherit; background:var(--panel-2); color:var(--ink);">
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div>
+                            <label style="font-weight:600; font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Source</label>
+                            <select id="leadSource" name="source" class="input" style="width:100%; border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 12px; font:inherit; background:var(--panel-2); color:var(--ink); height:40px;">
+                                <option value="manual">Manual</option>
+                                <option value="whatsapp">WhatsApp</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="facebook">Facebook</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="email">Email</option>
+                                <option value="telegram">Telegram</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-weight:600; font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Status</label>
+                            <select id="leadStatus" name="status" class="input" style="width:100%; border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 12px; font:inherit; background:var(--panel-2); color:var(--ink); height:40px;">
+                                <option value="new">New</option>
+                                <option value="contacted">Contacted</option>
+                                <option value="qualified">Qualified</option>
+                                <option value="proposal">Proposal</option>
+                                <option value="negotiation">Negotiation</option>
+                                <option value="won">Won</option>
+                                <option value="lost">Lost</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-weight:600; font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Notes</label>
+                        <textarea id="leadNotes" name="notes" class="textarea" placeholder="Describe client needs, budget or follow-up details..." style="width:100%; border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 12px; font:inherit; background:var(--panel-2); color:var(--ink); min-height:60px; resize:vertical;"></textarea>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px;">
+                        <button type="button" class="btn secondary sm" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn lime sm" style="background:var(--lime); color:var(--lime-ink); font-weight:700;">Save Lead</button>
+                    </div>
+                </form>
+            `;
+            m.classList.add('open');
+        }
+
+        async function submitAddLead(e) {
+            e.preventDefault();
+            const form = document.getElementById('addLeadForm');
+            const data = {
+                name: document.getElementById('leadName').value,
+                business: document.getElementById('leadBusiness').value,
+                phone: document.getElementById('leadPhone').value,
+                email: document.getElementById('leadEmail').value,
+                location: document.getElementById('leadLocation').value,
+                industry: document.getElementById('leadIndustry').value,
+                source: document.getElementById('leadSource').value,
+                status: document.getElementById('leadStatus').value,
+                notes: document.getElementById('leadNotes').value
+            };
+            try {
+                const res = await fetch('/api/lead/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const resData = await res.json();
+                if (resData.error) {
+                    toast(resData.error, true);
+                } else {
+                    toast('Lead added successfully.');
+                    closeModal();
+                    setTimeout(() => location.reload(), 600);
+                }
+            } catch (err) {
+                toast('Could not add lead.', true);
+            }
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+        // Render any server-sent markdown blocks (daily brief, ad recommendation).
+        document.querySelectorAll('.md').forEach(el => {
+            const raw = el.textContent;
+            if (raw && raw.trim()) el.innerHTML = mdToHtml(raw);
+        });
+
+        loadHistory();
+    </script>
+</body>
+</html>

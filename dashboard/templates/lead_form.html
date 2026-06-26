@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get in Touch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #e7e8ea; --panel: #fff; --panel-2: #f4f5f7; --ink: #15161a;
+            --muted: #8b8e98; --line: #e2e4e8; --lime: #c8f135; --lime-dark: #b4dc28;
+            --lime-ink: #1b2207; --coral: #ff6f61; --green: #16955a;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; min-height: 100vh; background:
+                radial-gradient(900px 500px at 85% -10%, rgba(200,241,53,.35), transparent 60%),
+                radial-gradient(700px 460px at -5% 0%, rgba(139,123,255,.18), transparent 55%), var(--bg);
+            color: var(--ink); font-family: Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            display: grid; place-items: center; padding: 24px;
+        }
+        .card { background: var(--panel); border-radius: 24px; width: 100%; max-width: 480px; padding: 34px 32px; box-shadow: 0 30px 70px -24px rgba(0,0,0,.3); }
+        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+        .logo { width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(135deg, var(--lime), #a855f7); display: grid; place-items: center; }
+        .logo svg { width: 24px; height: 24px; stroke: var(--lime-ink); }
+        .brand b { font-size: 15px; } .brand span { display: block; font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+        h1 { margin: 0 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+        .sub { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+        label { display: block; font-size: 12.5px; font-weight: 650; margin: 0 0 6px; }
+        .field { margin-bottom: 16px; }
+        .input, select, textarea {
+            width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+            font: inherit; background: var(--panel-2); color: var(--ink); transition: border-color .15s, box-shadow .15s;
+        }
+        .input:focus, select:focus, textarea:focus { outline: none; border-color: var(--lime-dark); box-shadow: 0 0 0 3px rgba(200,241,53,.4); }
+        textarea { min-height: 90px; resize: vertical; }
+        .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn { width: 100%; border: 0; border-radius: 13px; background: var(--ink); color: #fff; padding: 15px; font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; transition: transform .12s, filter .15s; margin-top: 6px; }
+        .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+        .btn:disabled { opacity: .6; cursor: default; transform: none; }
+        .err { color: var(--coral); font-size: 13px; margin-top: 12px; text-align: center; min-height: 18px; }
+        .thanks { text-align: center; padding: 20px 0; }
+        .thanks .ok { width: 72px; height: 72px; border-radius: 50%; background: var(--lime); display: grid; place-items: center; margin: 0 auto 20px; }
+        .thanks .ok svg { width: 36px; height: 36px; stroke: var(--lime-ink); }
+        .thanks h2 { margin: 0 0 8px; font-size: 22px; font-weight: 800; }
+        .thanks p { color: var(--muted); margin: 0; }
+        .foot { text-align: center; font-size: 11.5px; color: var(--muted); margin-top: 18px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="brand">
+            <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+            <div><b>Let's build something great</b><span>Tell us about your project</span></div>
+        </div>
+
+        <div id="formWrap">
+            <h1>Get a free quote</h1>
+            <p class="sub">Fill this in and our team will reach out within one business day.</p>
+
+            <form id="leadForm" onsubmit="submitLead(event)">
+                <div class="field">
+                    <label for="name">Your name *</label>
+                    <input class="input" id="name" name="name" placeholder="Jane Doe" required>
+                </div>
+                <div class="two">
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input class="input" id="email" name="email" type="email" placeholder="you@company.com">
+                    </div>
+                    <div class="field">
+                        <label for="phone">Phone</label>
+                        <input class="input" id="phone" name="phone" placeholder="+971 50 000 0000">
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="business">Business name</label>
+                    <input class="input" id="business" name="business" placeholder="Acme Restaurant">
+                </div>
+                <div class="field">
+                    <label for="service">What do you need?</label>
+                    <select id="service" name="service">
+                        <option value="">Select a service…</option>
+                        <option>New website</option>
+                        <option>Website redesign</option>
+                        <option>E-commerce store</option>
+                        <option>SEO / Marketing</option>
+                        <option>Social media ads</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="message">Tell us more</label>
+                    <textarea id="message" name="message" placeholder="A little about your project, budget, or timeline…"></textarea>
+                </div>
+                <button class="btn" type="submit" id="submitBtn">Send my request →</button>
+                <div class="err" id="err"></div>
+            </form>
+        </div>
+
+        <div id="thanks" class="thanks" style="display:none">
+            <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+            <h2>Thank you!</h2>
+            <p id="thanksMsg">We've received your request and will be in touch shortly.</p>
+        </div>
+
+        <div class="foot">Powered by AI Sales Assistant</div>
+    </div>
+
+    <script>
+        async function submitLead(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const err = document.getElementById('err');
+            err.textContent = '';
+            const data = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                business: document.getElementById('business').value.trim(),
+                service: document.getElementById('service').value,
+                message: document.getElementById('message').value.trim(),
+            };
+            if (!data.name && !data.email && !data.phone) {
+                err.textContent = 'Please add at least your name, email, or phone.';
+                return;
+            }
+            btn.disabled = true; btn.textContent = 'Sending…';
+            try {
+                const res = await fetch('/api/leads/ingest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                const out = await res.json();
+                if (!res.ok || out.error) { throw new Error(out.error || 'Something went wrong.'); }
+                document.getElementById('formWrap').style.display = 'none';
+                document.getElementById('thanks').style.display = 'block';
+                if (out.message) document.getElementById('thanksMsg').textContent = out.message;
+            } catch (ex) {
+                err.textContent = ex.message || 'Could not send. Please try again.';
+                btn.disabled = false; btn.textContent = 'Send my request →';
+            }
+        }
+    </script>
+</body>
+</html>
