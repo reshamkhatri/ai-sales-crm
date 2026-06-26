@@ -17,6 +17,12 @@ from config import DASHBOARD_HOST, DASHBOARD_PORT, META_VERIFY_TOKEN, WHATSAPP_V
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db.init_db()
+    # Populate a demo dataset only if the DB is empty (e.g. a fresh deploy).
+    try:
+        from core import demo_seed
+        demo_seed.seed_if_empty()
+    except Exception as e:
+        print(f"[demo_seed] skipped: {e}")
     scheduler = BackgroundScheduler()
     # Daily ad pull at 9 AM
     scheduler.add_job(ad_analyzer.get_insights, CronTrigger(hour=9, minute=0))

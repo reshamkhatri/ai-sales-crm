@@ -2,8 +2,13 @@ import sqlite3
 import os
 from config import DATABASE_PATH
 
-# Ensure the DB directory exists
-os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_SCHEMA_PATH = os.path.join(_HERE, "schema.sql")
+
+# Ensure the DB directory exists (works regardless of working directory)
+_db_dir = os.path.dirname(DATABASE_PATH)
+if _db_dir:
+    os.makedirs(_db_dir, exist_ok=True)
 
 def get_connection():
     conn = sqlite3.connect(DATABASE_PATH)
@@ -11,7 +16,7 @@ def get_connection():
     return conn
 
 def init_db():
-    with open("database/schema.sql", "r") as f:
+    with open(_SCHEMA_PATH, "r") as f:
         schema = f.read()
     conn = get_connection()
     conn.executescript(schema)

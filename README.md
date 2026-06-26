@@ -10,6 +10,11 @@
 [![LLM](https://img.shields.io/badge/LLM-OpenAI%20%7C%20DeepSeek-412991?logo=openai&logoColor=white)](#ai-provider)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+**[🚀 Live demo](#)** &nbsp;·&nbsp; one-click deploy →
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/reshamkhatri/ai-sales-crm)
+
+<sub>_Replace the Live demo link with your Render URL after deploying._</sub>
+
 </div>
 
 ---

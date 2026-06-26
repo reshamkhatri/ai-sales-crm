@@ -1,0 +1,23 @@
+# Render Blueprint — deploys the AI Sales CRM as a web service.
+# Render auto-detects this file. See deploy steps in README.
+services:
+  - type: web
+    name: ai-sales-crm
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    # Bind to Render's injected $PORT (not the local 8000).
+    startCommand: "uvicorn dashboard.app:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.4"
+      # AI provider — leave OPENAI_BASE_URL blank for OpenAI, or set DeepSeek's URL.
+      - key: OPENAI_API_KEY
+        sync: false        # you enter this secret in the Render dashboard
+      - key: OPENAI_BASE_URL
+        sync: false
+      - key: OPENAI_MODEL
+        value: "gpt-4o-mini"
+      # Lead Finder extension key (blank = accept any non-empty key).
+      - key: LEADFINDER_API_KEY
+        sync: false
