@@ -3,7 +3,10 @@ import openai
 from config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_BASE_URL, AGENCY_NAME, AGENCY_SERVICES, AGENCY_LOCATION
 
 # base_url lets us use any OpenAI-compatible provider (DeepSeek, Together, Groq, OpenRouter, local).
-client = openai.OpenAI(api_key=OPENAI_API_KEY, base_url=OPENAI_BASE_URL or None)
+# Use a placeholder key when none is set so the client still constructs (the newer
+# OpenAI SDK errors without one). Real calls are guarded by `if not OPENAI_API_KEY`
+# in ask() and the copilot, so the placeholder is never actually used to call the API.
+client = openai.OpenAI(api_key=OPENAI_API_KEY or "sk-not-configured", base_url=OPENAI_BASE_URL or None)
 
 def ask(prompt, system="You are a helpful sales and marketing assistant.", temperature=0.7):
     if not OPENAI_API_KEY:
