@@ -449,6 +449,7 @@ async def api_prospect_google_maps(request: Request):
         return JSONResponse({"error": "Search query is required"}, status_code=400)
         
     results = prospector.search_google_maps(query, location, limit)
+    results = prospector.enrich_prospects(results, max_sites=6, timeout=4)
     return prospector.check_duplicates(results)
 
 @app.post("/api/prospect/web-search")
@@ -468,6 +469,7 @@ async def api_prospect_web_search(request: Request):
         
     full_query = f"{query} {location}".strip()
     results = prospector._search_duckduckgo(full_query, limit)
+    results = prospector.enrich_prospects(results, max_sites=6, timeout=4)
     prospector._log_search("web_search", query, location, results)
     return prospector.check_duplicates(results)
 

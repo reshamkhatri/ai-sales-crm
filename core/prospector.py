@@ -538,15 +538,31 @@ def enrich_prospect(p: dict, timeout: int = 6) -> dict:
     p["enriched"] = True
     return p
 
-def enrich_prospects(prospects: list[dict], max_sites: int = 15, timeout: int = 6) -> list[dict]:
-    """Enrich prospects that have a website but are missing contacts (capped for speed)."""
-    count = 0
+def enrich_prospects(prospects: list[dict], max_sites: int = 10, timeout: int = 4) -> list[dict]:
+    """Enrich prospects that have a website but are missing contacts concurrently using a ThreadPoolExecutor."""
+    from concurrent.futures import ThreadPoolExecutor
+    
+    targets = []
     for p in prospects:
-        if count >= max_sites:
+        if len(targets) >= max_sites:
             break
         if p.get("website") and not (p.get("email") and p.get("phone")):
-            enrich_prospect(p, timeout=timeout)
-            count += 1
+            targets.append(p)
+            
+    if not targets:
+        return prospects
+        
+    print(f"[Prospector] Enriching {len(targets)} websites concurrently...")
+    with ThreadPoolExecutor(max_workers=min(len(targets), 10)) as executor:
+        # Submit tasks
+        futures = {executor.submit(enrich_prospect, p, timeout=timeout): p for p in targets}
+        # Wait for all to complete
+        for future in futures:
+            try:
+                future.result()
+            except Exception as e:
+                print(f"[Prospector] Concurrent enrich task failed: {e}")
+                
     return prospects
 
 
