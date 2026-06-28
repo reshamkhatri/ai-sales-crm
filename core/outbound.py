@@ -2,8 +2,6 @@ import json
 from core import crm, ai_brain
 from database import db
 
-from config import OPENAI_API_KEY
-
 def find_leads_to_outreach(source="manual"):
     """In a real system, this would scrape groups/directories. 
     For now, returns leads with no contact attempts."""
@@ -35,8 +33,8 @@ def generate_call_list(min_score=50):
         if cached:
             script = cached["draft_text"]
         else:
-            if not OPENAI_API_KEY:
-                script = "OpenAI API key not set. Please set it in your .env file to generate scripts."
+            if not ai_brain.AI_ENABLED:
+                script = "No AI provider configured. Set ANTHROPIC_API_KEY (Claude) or OPENAI_API_KEY in your .env to generate scripts."
             else:
                 try:
                     script = ai_brain.generate_cold_call_script(lead)

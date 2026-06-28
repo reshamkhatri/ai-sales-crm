@@ -10,6 +10,11 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 # Leave blank for OpenAI. For DeepSeek set: https://api.deepseek.com
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "")
 
+# Anthropic (Claude) — native support via the official `anthropic` SDK.
+# If ANTHROPIC_API_KEY is set, the AI layer uses Claude in preference to OpenAI.
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-opus-4-8")
+
 # Meta / Facebook
 META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "")
 META_AD_ACCOUNT_ID = os.getenv("META_AD_ACCOUNT_ID", "")

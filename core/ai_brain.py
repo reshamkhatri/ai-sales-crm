@@ -1,18 +1,54 @@
 import json
-import openai
-from config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_BASE_URL, AGENCY_NAME, AGENCY_SERVICES, AGENCY_LOCATION
+from config import (
+    OPENAI_API_KEY, OPENAI_MODEL, OPENAI_BASE_URL,
+    ANTHROPIC_API_KEY, ANTHROPIC_MODEL,
+    AGENCY_NAME, AGENCY_SERVICES, AGENCY_LOCATION,
+)
 
-# base_url lets us use any OpenAI-compatible provider (DeepSeek, Together, Groq, OpenRouter, local).
-# Use a placeholder key when none is set so the client still constructs (the newer
-# OpenAI SDK errors without one). Real calls are guarded by `if not OPENAI_API_KEY`
-# in ask() and the copilot, so the placeholder is never actually used to call the API.
-client = openai.OpenAI(api_key=OPENAI_API_KEY or "sk-not-configured", base_url=OPENAI_BASE_URL or None)
+# Provider selection: prefer Claude (Anthropic) when its key is present, otherwise
+# fall back to OpenAI / any OpenAI-compatible provider (DeepSeek, Together, Groq, ...).
+if ANTHROPIC_API_KEY:
+    AI_PROVIDER = "anthropic"
+elif OPENAI_API_KEY:
+    AI_PROVIDER = "openai"
+else:
+    AI_PROVIDER = None
+
+# Callers check this instead of a specific provider's key so either provider works.
+AI_ENABLED = AI_PROVIDER is not None
+
+_anthropic_client = None
+_openai_client = None
+
+if AI_PROVIDER == "anthropic":
+    import anthropic
+    _anthropic_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+elif AI_PROVIDER == "openai":
+    import openai
+    # base_url lets us use any OpenAI-compatible provider. Keep timeout/retries
+    # modest so a slow or down gateway fails fast and the caller can fall back.
+    _openai_client = openai.OpenAI(
+        api_key=OPENAI_API_KEY, base_url=OPENAI_BASE_URL or None,
+        timeout=30, max_retries=1,
+    )
+
 
 def ask(prompt, system="You are a helpful sales and marketing assistant.", temperature=0.7):
-    if not OPENAI_API_KEY:
-        return "[ERROR] OpenAI API key not set."
+    if not AI_ENABLED:
+        return "[ERROR] No AI provider configured. Set ANTHROPIC_API_KEY (Claude) or OPENAI_API_KEY in your .env."
     try:
-        resp = client.chat.completions.create(
+        if AI_PROVIDER == "anthropic":
+            # Opus 4.8 rejects `temperature`, so it is intentionally not forwarded;
+            # callers pass it only for the OpenAI path.
+            resp = _anthropic_client.messages.create(
+                model=ANTHROPIC_MODEL,
+                max_tokens=2000,
+                system=system,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return "".join(b.text for b in resp.content if b.type == "text")
+
+        resp = _openai_client.chat.completions.create(
             model=OPENAI_MODEL,
             messages=[
                 {"role": "system", "content": system},

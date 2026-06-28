@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timedelta
 
-from config import AGENCY_LOCATION, AGENCY_NAME, AGENCY_SERVICES, OPENAI_API_KEY
+from config import AGENCY_LOCATION, AGENCY_NAME, AGENCY_SERVICES
 from core import ai_brain
 from database import db
 
@@ -426,7 +426,7 @@ def ask_business_copilot(question):
     db.execute("INSERT INTO ai_chat_messages (role, content, data_snapshot) VALUES (?, ?, ?)",
                ("user", question, json.dumps(snapshot)))
 
-    if not OPENAI_API_KEY:
+    if not ai_brain.AI_ENABLED:
         answer = _fallback_answer(question, snapshot)
     else:
         system = f"""You are the AI Business Copilot for {AGENCY_NAME}.
@@ -446,6 +446,10 @@ Answer with:
 3. Recommended next action
 Keep it short and grounded in the snapshot."""
         answer = ai_brain.ask(prompt, system=system, temperature=0.2)
+        # If the AI provider errored (bad key, gateway down, rate limit), don't
+        # surface a raw error — fall back to the deterministic CRM summary.
+        if isinstance(answer, str) and answer.startswith("[ERROR]"):
+            answer = _fallback_answer(question, snapshot)
 
     db.execute("INSERT INTO ai_chat_messages (role, content, data_snapshot) VALUES (?, ?, ?)",
                ("assistant", answer, json.dumps(snapshot)))
@@ -476,7 +480,7 @@ def generate_daily_brief():
     snapshot = get_business_snapshot(days=1)
     question = "Generate today's CEO brief with hot leads, overdue follow-ups, meetings, ad notes, and the top 3 actions."
 
-    if not OPENAI_API_KEY:
+    if not ai_brain.AI_ENABLED:
         content = _fallback_answer(question, snapshot)
     else:
         system = f"""You are the daily CEO briefing assistant for {AGENCY_NAME}.
@@ -492,6 +496,8 @@ Sections:
 - Ads and recommendations
 - Top 3 actions today"""
         content = ai_brain.ask(prompt, system=system, temperature=0.2)
+        if isinstance(content, str) and content.startswith("[ERROR]"):
+            content = _fallback_answer(question, snapshot)
 
     brief_date = _today().isoformat()
     db.execute(
